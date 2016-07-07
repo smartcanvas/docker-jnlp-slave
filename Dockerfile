@@ -34,6 +34,8 @@ RUN apk add --update --no-cache openssl bash \
  && /bin/bash -l -c "/opt/google-cloud-sdk/bin/gcloud --quiet config set component_manager/disable_update_check true && exit" \
  && rm -rf /opt/google-cloud-sdk/.install/.backup
 
+RUN apk add --update --no-cache git
+
 ENV PATH /opt/google-cloud-sdk/bin:$PATH
 
 USER jenkins
