@@ -1,27 +1,5 @@
-# The MIT License
-#
-#  Copyright (c) 2015, CloudBees, Inc.
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included in
-#  all copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
-
 FROM java:8-jdk-alpine
-MAINTAINER Nicolas De Loof <nicolas.deloof@gmail.com>
+MAINTAINER Fabio Franco Uechi <fuechi@ciandt.com>
 
 ENV HOME /home/jenkins
 ENV JENKINS_REMOTING_VERSION=2.60
@@ -30,13 +8,37 @@ RUN adduser -S -h $HOME jenkins jenkins
 RUN apk add --update --no-cache curl \
   && curl --create-dirs -sSLo /usr/share/jenkins/slave.jar http://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_REMOTING_VERSION}/remoting-${JENKINS_REMOTING_VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
-  && chmod 644 /usr/share/jenkins/slave.jar \
-  && apk del curl
+  && chmod 644 /usr/share/jenkins/slave.jar 
 
 COPY jenkins-slave /usr/local/bin/jenkins-slave
 
+USER root
+
+ENV CLOUDSDK_CORE_DISABLE_PROMPTS=1
+ENV GCLOUD_SDK_VERSION=116.0.0
+ENV GCLOUD_SDK_URL=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz
+ENV CLOUDSDK_PYTHON_SITEPACKAGES 1
+RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+RUN apk add --no-cache python && \
+    python -m ensurepip && \
+    rm -rf /usr/lib/python*/ensurepip && \
+    pip install --upgrade pip setuptools && \
+    rm -rf /root/.cache
+
+RUN apk add --update --no-cache openssl bash \
+ && rm -rf /var/cache/apk/* \
+ && mkdir /opt && cd /opt \
+ && wget -q -O - $GCLOUD_SDK_URL |tar zxf - \
+ && /bin/bash -l -c "/opt/google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path=/.bashrc --disable-installation-options && exit" \
+ && /bin/bash -l -c "/opt/google-cloud-sdk/bin/gcloud --quiet config set component_manager/disable_update_check true && exit" \
+ && rm -rf /opt/google-cloud-sdk/.install/.backup
+
+ENV PATH /opt/google-cloud-sdk/bin:$PATH
+
+USER jenkins
+
 VOLUME /home/jenkins
 WORKDIR /home/jenkins
-USER jenkins
 
 ENTRYPOINT ["jenkins-slave"]
