@@ -4,7 +4,7 @@ MAINTAINER Fabio Franco Uechi <fuechi@ciandt.com>
 ENV HOME /home/jenkins
 ENV JENKINS_REMOTING_VERSION=2.60
 
-RUN useradd -c "Jenkins user" -d $HOME -m jenkins
+RUN useradd -c "Jenkins user" -u 2000 -d $HOME -m jenkins
 
 RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar http://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_REMOTING_VERSION}/remoting-${JENKINS_REMOTING_VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
