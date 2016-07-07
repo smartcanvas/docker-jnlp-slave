@@ -20,16 +20,18 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-FROM java:8-jdk
+FROM java:8-jdk-alpine
 MAINTAINER Nicolas De Loof <nicolas.deloof@gmail.com>
 
 ENV HOME /home/jenkins
 ENV JENKINS_REMOTING_VERSION=2.60
-RUN useradd -c "Jenkins user" -d $HOME -m jenkins
+RUN adduser -S -h $HOME jenkins jenkins
 
-RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar http://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_REMOTING_VERSION}/remoting-${JENKINS_REMOTING_VERSION}.jar \
+RUN apk add --update --no-cache curl \
+  && curl --create-dirs -sSLo /usr/share/jenkins/slave.jar http://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_REMOTING_VERSION}/remoting-${JENKINS_REMOTING_VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
-  && chmod 644 /usr/share/jenkins/slave.jar
+  && chmod 644 /usr/share/jenkins/slave.jar \
+  && apk del curl
 
 COPY jenkins-slave /usr/local/bin/jenkins-slave
 
