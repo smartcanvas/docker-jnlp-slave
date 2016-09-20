@@ -2,7 +2,7 @@ FROM java:8-jdk
 MAINTAINER Fabio Franco Uechi <fuechi@ciandt.com>
 
 ENV HOME /home/jenkins
-ENV JENKINS_REMOTING_VERSION=2.60
+ENV JENKINS_REMOTING_VERSION=2.62
 
 RUN useradd -c "Jenkins user" -u 2000 -d $HOME -m jenkins
 
@@ -18,7 +18,7 @@ WORKDIR /home/jenkins
 USER root
 
 ENV CLOUDSDK_CORE_DISABLE_PROMPTS=1
-ENV GCLOUD_SDK_VERSION=116.0.0
+ENV GCLOUD_SDK_VERSION=126.0.0
 ENV GCLOUD_SDK_URL=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz
 ENV CLOUDSDK_PYTHON_SITEPACKAGES 1
 RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
