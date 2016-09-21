@@ -13,9 +13,14 @@ RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 RUN cd /opt \
 	&& wget -q -O - $GCLOUD_SDK_URL |tar zxf - \
-	&& /bin/bash -l -c "/opt/google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path=/.bashrc --disable-installation-options && exit" \
+	&& /bin/bash -l -c "/opt/google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path=/.bashrc --additional-components app-engine-java app-engine-python app kubectl alpha beta gcd-emulator pubsub-emulator cloud-datastore-emulator app-engine-go bigtable && exit" \
 	&& /bin/bash -l -c "/opt/google-cloud-sdk/bin/gcloud --quiet config set component_manager/disable_update_check true && exit" \
 	&& rm -rf /opt/google-cloud-sdk/.install/.backup
+
+# Disable updater completely.
+# Running `gcloud components update` doesn't really do anything in a union FS.
+# Changes are lost on a subsequent run.
+RUN sed -i -- 's/\"disable_updater\": false/\"disable_updater\": true/g' /opt/google-cloud-sdk/lib/googlecloudsdk/core/config.json
 
 ENV PATH /opt/google-cloud-sdk/bin:$PATH
 
