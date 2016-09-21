@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # The MIT License
 #
@@ -35,7 +35,7 @@ if [ $# -eq 1 ]; then
 else
 
 	# if -tunnel is not provided try env vars
-	if [ "$@" != *"-tunnel "* ]; then
+	if [[ "$@" != *"-tunnel "* ]]; then
 		if [ ! -z "$JENKINS_TUNNEL" ]; then
 			TUNNEL="-tunnel $JENKINS_TUNNEL"
 		fi
@@ -45,5 +45,10 @@ else
 		URL="-url $JENKINS_URL"
 	fi
 
-	exec java $JAVA_OPTS -cp /usr/share/jenkins/slave.jar hudson.remoting.jnlp.Main -headless $TUNNEL $URL "$@"
+	if [ -z "$JNLP_PROTOCOL_OPTS" ]; then
+		echo "Warning: JnlpProtocol3 is disabled by default, use JNLP_PROTOCOL_OPTS to alter the behavior"
+		JNLP_PROTOCOL_OPTS="-Dorg.jenkinsci.remoting.engine.JnlpProtocol3.disabled=true"
+	fi
+
+	exec java $JAVA_OPTS $JNLP_PROTOCOL_OPTS -cp /usr/share/jenkins/slave.jar hudson.remoting.jnlp.Main -headless $TUNNEL $URL "$@"
 fi
