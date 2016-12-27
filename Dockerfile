@@ -39,4 +39,21 @@ RUN set -x \
 
 USER jenkins
 
+# Metadata params
+ARG VERSION
+ARG VCS_REF
+ARG BUILD_DATE
+
+# Metadata
+LABEL org.label-schema.vendor="Smart Canvas" \
+      org.label-schema.url="http://smartcanvas.com" \
+      org.label-schema.name="Jenkins slave" \
+      org.label-schema.description="Jenkins slave with gcloud and docker pre installed" \    
+      org.label-schema.version="${VERSION}" \
+      org.label-schema.vcs-url="https://github.com/smartcanvas/docker-jnlp-slave.git" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.docker.schema-version="1.0"
+
+
 ENTRYPOINT ["jenkins-slave"]
