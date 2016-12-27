@@ -15,5 +15,5 @@ echo $DOCKER_TAG
 
 docker build --build-arg VCS_REF=`git rev-parse — short HEAD` \
   --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
-  --build-arg VERISON=0.1.0+sha`git rev-parse — short HEAD` \
+  --build-arg VERSION=0.1.0+sha`git rev-parse — short HEAD` \
   -t $IMAGE_NAME .
